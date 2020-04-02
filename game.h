@@ -14,4 +14,5 @@ public:
     void draw();        //Draw the game
 };
 
+void kill();
 #endif
