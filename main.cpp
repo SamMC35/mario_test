@@ -32,7 +32,8 @@ int main()
 			default:
 				break;
 		}
-		Render(60);
+		Render(70);
 	}
+	//kill();
 	CloseWindow();
 }

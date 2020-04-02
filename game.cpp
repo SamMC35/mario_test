@@ -40,6 +40,14 @@ Game::Game()
 
 Timer init_timer;
 
+float VelocityCalculate(float goal, float current, float dt)
+{
+    if(current < goal)
+        return current + sign(current)*dt;
+    else
+        return goal;
+}
+
 void Game::init()
 {
     //Initializes everything
@@ -51,7 +59,7 @@ void Game::init()
         init_timer.reset_time();
         
         player->x = 4;
-        player->y = 10;
+        player->y = 6;
         
         player->hsp = 0;
         player->vsp = 0;
@@ -87,7 +95,8 @@ void Game::draw()
 }
 
 float xVel = 0, yVel = 0;
-bool grounded;
+bool grounded = true, can_jump = true;
+float velx = 0;
 
 void Game::update()
 {
@@ -108,21 +117,36 @@ void Game::update()
     if(!keyDown(SDL_SCANCODE_LEFT) && !keyDown(SDL_SCANCODE_RIGHT))
         xVel = 0.0f;
         
-    if(keyDown(SDL_SCANCODE_X))
+    if(keyDown(SDL_SCANCODE_X) || ctrlDown(0,SDL_CONTROLLER_BUTTON_A))
     {
-        yVel = -1.0f;
+        if(grounded && can_jump)
+        {
+            yVel = -1.6f;
+            can_jump = false;
+        }
     }  
 
+    if(!keyDown(SDL_SCANCODE_X) && !can_jump)
+    {
+        yVel = 0.0f;
+        can_jump = true;
+    }
+
+    
 
     if(!grounded)
     {
-        yVel += 0.1f;
-    }  
+        yVel += 0.05f;
+    }
 
+    
     float newx = player->x + xVel * deltaTime;
     float newy = player->y + yVel * deltaTime;
 
-    if(xVel <= 0)
+    
+
+
+    if(xVel <= 0.0f)
     {
         if(GetTile(newx+0.0f,player->y+0.0f)|| GetTile(newx+0.0f,player->y+0.9f))
         {
@@ -141,8 +165,7 @@ void Game::update()
         }
     }
 
-    bool grounded = false;
-
+    
     if(yVel <= 0)
     {
         if(GetTile(newx+0.0f,newy)|| GetTile(newx+0.9f,newy))
@@ -163,15 +186,28 @@ void Game::update()
         }
     }
 
+    if(GetTile(newx+0.0f,newy+1.0f)|| GetTile(newx+0.9f,newy+1.0f))
+    {
+         cout << "down";
+         newy = (int)newy;
+         grounded = true;
+          yVel = 0;
+    }
+    else
+    {
+        grounded = false;
+    }
+
 
     player->x = newx;
     player->y = newy;
     //Horizontal movement
 
+    cout << "\033[2J\033[1;1H";
     cout << "del: "<<deltaTime<<endl; 
-    cout << "XVEL:" <<xVel <<endl;
+    cout << "XVEL:" <<velx <<endl;
     cout << "YVEL:" <<yVel <<endl;
-    
+    cout << "Grounded:" <<grounded <<endl;
     //Horizontal motion
 
 
